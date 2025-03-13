@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.jianspring.starter.feign.balancer.LoadBalancerNacosAutoConfiguration,\
+  com.jianspring.starter.feign.JianSpringFeignAutoConfiguration

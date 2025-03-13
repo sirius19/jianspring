@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+    <!-- 定义项目名 -->
+    <springProperty scope="context" name="projectName" source="spring.application.name"/>
+    <!--    <property name="projectName" value="${spring.application.name}"/>-->
+
+    <!-- 定义日志目录 -->
+    <property name="logDir" value="/data/logs/${projectName}"/>
+    <!-- 根据测试环境和线上环境设置不同的输出方式 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}%5level|%X{ip}|${projectName}|%X{parentId}|%X{spanId}|%X{traceId}|%X{tenantId}|%X{userId}|%thread]|%logger{10}|%msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="dailyRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logDir}/${projectName}.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}%5level|%X{ip}|${projectName}|%X{parentId}|%X{spanId}|%X{traceId}|%X{tenantId}|%X{userId}|%thread]|%logger{10}|%msg%n
+            </pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}/${projectName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 设置最大保留天数为10天 -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="sentinelFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logDir}/sentinel-record.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%level|%logger|%msg%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}/sentinel-record-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 设置最大保留天数为10天 -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="sentinelFile2" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logDir}/sentinel-command-center.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%level|%logger|%msg%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}/sentinel-command-center-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 设置最大保留天数为10天 -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 定义 JSON 滚动文件 appender -->
+    <appender name="jsonDailyRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logDir}/${projectName}.json.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- 添加自定义字段 -->
+            <customFields>{"projectName": "${projectName}", "parentId": "%X{parentId}", "spanId": "%X{spanId}",
+                "traceId": "%X{traceId}", "tenant": "%X{tenantId}", "user": "%X{userId}"}
+            </customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>version</version>
+                <message>message</message>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <levelValue>levelValue</levelValue>
+            </fieldNames>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}/${projectName}-json-%d{yyyy-MM-dd}.%i.json.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <springProfile name="!production">
+        <!-- 测试环境输出到控制台和文件 -->
+        <root level="INFO">
+            <appender-ref ref="console"/>
+            <appender-ref ref="dailyRollingFile"/>
+        </root>
+    </springProfile>
+    <springProfile name="production">
+        <!-- 线上环境只输出到文件 -->
+        <root level="INFO">
+            <appender-ref ref="dailyRollingFile"/>
+            <!--            <appender-ref ref="jsonDailyRollingFile"/>-->
+        </root>
+    </springProfile>
+
+    <logger name="sentinelRecordLogger">
+        <appender-ref ref="sentinelFile"/>
+    </logger>
+
+    <logger name="sentinelCommandCenterLogger">
+        <appender-ref ref="sentinelFile2"/>
+    </logger>
+</configuration>

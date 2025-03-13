@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    loadbalancer:
+      hint-header-name: hint
+      jianspring:
+        nacos:
+          enabled: true

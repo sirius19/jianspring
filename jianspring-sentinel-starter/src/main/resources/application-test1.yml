@@ -1,0 +1,56 @@
+feign:
+  sentinel:
+    enabled: true
+spring:
+  cloud:
+    sentinel:
+      filter:
+        enabled: true
+      log:
+        dir: /data/logs/${spring.application.name}
+      datasource:
+        flowDs:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            namespace: sentinel
+            group-id: SENTINEL_GROUP
+            data-id: ${spring.application.name}-flow-rules
+            rule-type: flow
+        degradeDs:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            namespace: sentinel
+            group-id: SENTINEL_GROUP
+            data-id: ${spring.application.name}-degrade-rules
+            rule-type: degrade
+        authorityDs:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            namespace: sentinel
+            group-id: SENTINEL_GROUP
+            data-id: ${spring.application.name}-auth-rules
+            rule-type: authority
+        systemDs:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            namespace: sentinel
+            group-id: SENTINEL_GROUP
+            data-id: ${spring.application.name}-system-rules
+            rule-type: system
+        paramflowDs:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            namespace: sentinel
+            group-id: SENTINEL_GROUP
+            data-id: ${spring.application.name}-param-flow-rules
+            rule-type: param-flow

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jian-spring</artifactId>
+        <groupId>com.jianspring</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jianspring-cloud-starter</artifactId>
+
+    <dependencies>
+        <!-- redis -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-redis-starter</artifactId>
+        </dependency>
+        <!-- 访问权限控制 -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-iam-starter</artifactId>
+        </dependency>
+        <!-- 链路追踪埋点 -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-trace-starter</artifactId>
+        </dependency>
+        <!-- feign -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-feign-starter</artifactId>
+        </dependency>
+        <!-- 日志 -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-logs-starter</artifactId>
+        </dependency>
+        <!-- JSR303验证框架 -->
+
+        <!-- 公共类 -->
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-commons-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jianspring</groupId>
+            <artifactId>jianspring-sentinel-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-okhttp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>1.59.1</version> <!-- 选择合适版本 -->
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>2.4.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+    </dependencies>
+</project>
