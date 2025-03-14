@@ -1,7 +1,7 @@
 package com.jianspring.starter.trace;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import com.jianspring.start.utils.id.ObjectId;
 import com.jianspring.starter.commons.UserContextUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,13 +28,13 @@ public class TracingFilter extends OncePerRequestFilter implements Ordered {
             String parent;
             String span;
             if (!StringUtils.hasText(trace)) {
-                trace = ObjectId.nextId();
-                span = ObjectId.nextId();
+                trace = IdUtil.fastSimpleUUID();
+                span = IdUtil.fastSimpleUUID();
                 parent = span;
                 UserContextUtils.setOnlyTracing(span, span, trace);
             } else {
                 parent = request.getHeader("JIAN-SPAN-ID");
-                span = ObjectId.nextId();
+                span = IdUtil.fastSimpleUUID();
                 UserContextUtils.setOnlyTracing(parent, span, trace);
             }
             MDC.put("traceId", trace);
