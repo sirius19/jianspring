@@ -7,7 +7,7 @@ import lombok.ToString;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Author:  InfoInsights
+ * @Author: InfoInsights
  * @Date: 2023/3/3 下午1:42
  * @Version: 1.0.0
  */

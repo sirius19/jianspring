@@ -4,6 +4,7 @@ import com.jianspring.starter.redis.enums.IRedisKey;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -65,7 +66,6 @@ public class RedisHolder {
 
     public Object get(IRedisKey iRedisKey, String bizKey) {
         String key = buildKey(iRedisKey, bizKey);
-        applyTtl(iRedisKey, key);
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -101,7 +101,11 @@ public class RedisHolder {
      * @param value     业务value
      */
     public boolean setIfAbsent(IRedisKey iRedisKey, String bizKey, Object value) {
-        Boolean flag = redisTemplate.opsForValue().setIfAbsent(iRedisKey.getPrefixKey() + bizKey, null == value ? iRedisKey.getDefaultValue() : value, iRedisKey.getTtl(), iRedisKey.getTimeUnit());
+        String key = buildKey(iRedisKey, bizKey);
+        Boolean flag = redisTemplate.opsForValue().setIfAbsent(key,
+                null == value ? iRedisKey.getDefaultValue() : value,
+                iRedisKey.getTtl(),
+                iRedisKey.getTimeUnit());
         return null == flag ? Boolean.FALSE : flag;
     }
 
@@ -114,8 +118,9 @@ public class RedisHolder {
      * @param values    list 值
      */
     public void setSet(IRedisKey iRedisKey, String bizKey, List<Object> values) {
-        redisTemplate.opsForSet().add(iRedisKey.getPrefixKey() + bizKey, values);
-        redisTemplate.expire(iRedisKey.getPrefixKey() + bizKey, iRedisKey.getTtl(), iRedisKey.getTimeUnit());
+        String key = buildKey(iRedisKey, bizKey);
+        redisTemplate.opsForSet().add(key, values.toArray());
+        applyTtl(iRedisKey, key);
     }
 
     /**
@@ -126,8 +131,9 @@ public class RedisHolder {
      * @param value     list 值
      */
     public void setSet(IRedisKey iRedisKey, String bizKey, Object value) {
-        redisTemplate.opsForSet().add(iRedisKey.getPrefixKey() + bizKey, value);
-        redisTemplate.expire(iRedisKey.getPrefixKey() + bizKey, iRedisKey.getTtl(), iRedisKey.getTimeUnit());
+        String key = buildKey(iRedisKey, bizKey);
+        redisTemplate.opsForSet().add(key, value);
+        applyTtl(iRedisKey, key);
     }
 
     /**
@@ -149,8 +155,9 @@ public class RedisHolder {
      * @param bizKey    业务key
      */
     public void removeSet(IRedisKey iRedisKey, String bizKey, String obj) {
-        redisTemplate.opsForSet().remove(iRedisKey + bizKey, obj);
-        redisTemplate.expire(iRedisKey.getPrefixKey() + bizKey, iRedisKey.getTtl(), iRedisKey.getTimeUnit());
+        String key = buildKey(iRedisKey, bizKey);
+        redisTemplate.opsForSet().remove(key, obj);
+        applyTtl(iRedisKey, key);
     }
 
     /**
@@ -203,12 +210,10 @@ public class RedisHolder {
      * @param member    成员
      * @return {@link Long}
      */
-    @Nullable
     public Long geoAdd(IRedisKey iRedisKey, String bizKey, Point point, String member) {
-        long result = redisTemplate.opsForGeo().add(iRedisKey.getPrefixKey() + bizKey, point, member);
-        if (iRedisKey.getTtl() > 0) {
-            redisTemplate.expire(iRedisKey.getPrefixKey() + bizKey, iRedisKey.getTtl(), iRedisKey.getTimeUnit());
-        }
+        String key = buildKey(iRedisKey, bizKey);
+        long result = redisTemplate.opsForGeo().add(key, point, member);
+        applyTtl(iRedisKey, key);
         return result;
     }
 
@@ -269,13 +274,16 @@ public class RedisHolder {
      * @param bizKey    业务key
      * @param operation 具体操作函数
      * @param <T>       返回值类型
+     * @param applyTtl  是否执行ttl
      * @return 操作结果
      */
-    public <T> T executeCommand(IRedisKey iRedisKey, String bizKey, Function<String, T> operation) {
+    public <T> T executeCommand(IRedisKey iRedisKey, String bizKey, Function<String, T> operation, boolean applyTtl) {
         String key = buildKey(iRedisKey, bizKey);
         try {
             T result = operation.apply(key);
-            applyTtl(iRedisKey, key);
+            if (applyTtl) {
+                applyTtl(iRedisKey, key);
+            }
             return result;
         } catch (Exception e) {
             throw new RuntimeException("Redis操作失败: " + e.getMessage(), e);
@@ -288,12 +296,15 @@ public class RedisHolder {
      * @param iRedisKey key前缀
      * @param bizKey    业务key
      * @param operation 具体操作函数
+     * @param applyTtl  是否执行ttl
      */
-    public void executeVoidCommand(IRedisKey iRedisKey, String bizKey, Consumer<String> operation) {
+    public void executeVoidCommand(IRedisKey iRedisKey, String bizKey, Consumer<String> operation, boolean applyTtl) {
         String key = buildKey(iRedisKey, bizKey);
         try {
             operation.accept(key);
-            applyTtl(iRedisKey, key);
+            if (applyTtl) {
+                applyTtl(iRedisKey, key);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Redis操作失败: " + e.getMessage(), e);
         }
@@ -311,7 +322,7 @@ public class RedisHolder {
      */
     public void hashPut(IRedisKey iRedisKey, String bizKey, Object hashKey, Object value) {
         executeVoidCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHash().put(key, hashKey, value));
+                redisTemplate.opsForHash().put(key, hashKey, value), true);
     }
 
     /**
@@ -324,7 +335,7 @@ public class RedisHolder {
      */
     public Object hashGet(IRedisKey iRedisKey, String bizKey, Object hashKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHash().get(key, hashKey));
+                redisTemplate.opsForHash().get(key, hashKey), false);
     }
 
     /**
@@ -336,7 +347,7 @@ public class RedisHolder {
      */
     public Map<Object, Object> hashGetAll(IRedisKey iRedisKey, String bizKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHash().entries(key));
+                redisTemplate.opsForHash().entries(key), false);
     }
 
     /**
@@ -349,7 +360,7 @@ public class RedisHolder {
      */
     public Long hashDelete(IRedisKey iRedisKey, String bizKey, Object... hashKeys) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHash().delete(key, hashKeys));
+                redisTemplate.opsForHash().delete(key, hashKeys), false);
     }
 
     // ================ List类型操作 ================
@@ -364,7 +375,7 @@ public class RedisHolder {
      */
     public Long listLeftPush(IRedisKey iRedisKey, String bizKey, Object value) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForList().leftPush(key, value));
+                redisTemplate.opsForList().leftPush(key, value), true);
     }
 
     /**
@@ -377,7 +388,7 @@ public class RedisHolder {
      */
     public Long listRightPush(IRedisKey iRedisKey, String bizKey, Object value) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForList().rightPush(key, value));
+                redisTemplate.opsForList().rightPush(key, value), true);
     }
 
     /**
@@ -391,7 +402,7 @@ public class RedisHolder {
      */
     public List<Object> listRange(IRedisKey iRedisKey, String bizKey, long start, long end) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForList().range(key, start, end));
+                redisTemplate.opsForList().range(key, start, end), false);
     }
 
     /**
@@ -403,7 +414,7 @@ public class RedisHolder {
      */
     public Object listLeftPop(IRedisKey iRedisKey, String bizKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForList().leftPop(key));
+                redisTemplate.opsForList().leftPop(key), false);
     }
 
     /**
@@ -415,7 +426,7 @@ public class RedisHolder {
      */
     public Object listRightPop(IRedisKey iRedisKey, String bizKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForList().rightPop(key));
+                redisTemplate.opsForList().rightPop(key), false);
     }
 
     // ================ ZSet类型操作 ================
@@ -431,7 +442,7 @@ public class RedisHolder {
      */
     public Boolean zSetAdd(IRedisKey iRedisKey, String bizKey, Object value, double score) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForZSet().add(key, value, score));
+                redisTemplate.opsForZSet().add(key, value, score), true);
     }
 
     /**
@@ -445,7 +456,7 @@ public class RedisHolder {
      */
     public Set<Object> zSetRangeByScore(IRedisKey iRedisKey, String bizKey, double min, double max) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForZSet().rangeByScore(key, min, max));
+                redisTemplate.opsForZSet().rangeByScore(key, min, max), false);
     }
 
     /**
@@ -459,7 +470,7 @@ public class RedisHolder {
      */
     public Set<Object> zSetRange(IRedisKey iRedisKey, String bizKey, long start, long end) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForZSet().range(key, start, end));
+                redisTemplate.opsForZSet().range(key, start, end), false);
     }
 
     /**
@@ -472,7 +483,7 @@ public class RedisHolder {
      */
     public Double zSetScore(IRedisKey iRedisKey, String bizKey, Object value) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForZSet().score(key, value));
+                redisTemplate.opsForZSet().score(key, value), false);
     }
 
     /**
@@ -485,7 +496,7 @@ public class RedisHolder {
      */
     public Long zSetRemove(IRedisKey iRedisKey, String bizKey, Object... values) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForZSet().remove(key, values));
+                redisTemplate.opsForZSet().remove(key, values), true);
     }
 
     // ================ HyperLogLog类型操作 ================
@@ -500,7 +511,7 @@ public class RedisHolder {
      */
     public Long hyperLogLogAdd(IRedisKey iRedisKey, String bizKey, Object... values) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHyperLogLog().add(key, values));
+                redisTemplate.opsForHyperLogLog().add(key, values), true);
     }
 
     /**
@@ -512,7 +523,7 @@ public class RedisHolder {
      */
     public Long hyperLogLogSize(IRedisKey iRedisKey, String bizKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForHyperLogLog().size(key));
+                redisTemplate.opsForHyperLogLog().size(key), false);
     }
 
     // ================ Bitmap类型操作 ================
@@ -528,7 +539,7 @@ public class RedisHolder {
      */
     public Boolean bitMapSetBit(IRedisKey iRedisKey, String bizKey, long offset, boolean value) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForValue().setBit(key, offset, value));
+                redisTemplate.opsForValue().setBit(key, offset, value), true);
     }
 
     /**
@@ -541,7 +552,7 @@ public class RedisHolder {
      */
     public Boolean bitMapGetBit(IRedisKey iRedisKey, String bizKey, long offset) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.opsForValue().getBit(key, offset));
+                redisTemplate.opsForValue().getBit(key, offset), false);
     }
 
     /**
@@ -553,7 +564,7 @@ public class RedisHolder {
      */
     public Long bitMapCount(IRedisKey iRedisKey, String bizKey) {
         return executeCommand(iRedisKey, bizKey, key ->
-                redisTemplate.execute((RedisCallback<Long>) conn -> conn.bitCount(key.getBytes())));
+                redisTemplate.execute((RedisCallback<Long>) conn -> conn.bitCount(key.getBytes())), false);
     }
 
 
@@ -630,4 +641,20 @@ public class RedisHolder {
             return null;
         });
     }
+
+
+    /**
+     * 执行集群操作
+     *
+     * @param callback 集群操作回调
+     */
+    public <T> T executeClusterCommand(Function<RedisClusterConnection, T> callback) {
+        try {
+            RedisClusterConnection clusterConnection = redisTemplate.getConnectionFactory().getClusterConnection();
+            return callback.apply(clusterConnection);
+        } catch (Exception e) {
+            throw new RuntimeException("Redis集群操作失败: " + e.getMessage(), e);
+        }
+    }
+
 }
