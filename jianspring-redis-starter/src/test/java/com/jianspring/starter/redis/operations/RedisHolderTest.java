@@ -1,4 +1,4 @@
-package com.jianspring.starter.redis.holder;
+package com.jianspring.starter.redis.operations;
 
 import com.jianspring.starter.redis.config.TestRedisConfig;
 import com.jianspring.starter.redis.enums.IRedisKey;
@@ -51,7 +51,7 @@ public class RedisHolderTest {
     }
 
     @Autowired
-    private RedisHolder redisHolder;
+    private RedisOperations redisHolder;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -418,7 +418,7 @@ public class RedisHolderTest {
         // 通过反射调用私有方法
         String key = null;
         try {
-            java.lang.reflect.Method buildKeyMethod = RedisHolder.class.getDeclaredMethod("buildKey", IRedisKey.class, String.class);
+            java.lang.reflect.Method buildKeyMethod = RedisOperations.class.getDeclaredMethod("buildKey", IRedisKey.class, String.class);
             buildKeyMethod.setAccessible(true);
             key = (String) buildKeyMethod.invoke(redisHolder, testKey, bizKey);
         } catch (Exception e) {
@@ -438,7 +438,7 @@ public class RedisHolderTest {
 
         // 通过反射调用私有方法
         try {
-            java.lang.reflect.Method applyTtlMethod = RedisHolder.class.getDeclaredMethod("applyTtl", IRedisKey.class, String.class);
+            java.lang.reflect.Method applyTtlMethod = RedisOperations.class.getDeclaredMethod("applyTtl", IRedisKey.class, String.class);
             applyTtlMethod.setAccessible(true);
             applyTtlMethod.invoke(redisHolder, testKey, key);
         } catch (Exception e) {

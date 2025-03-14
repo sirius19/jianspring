@@ -1,4 +1,4 @@
-package com.jianspring.starter.redis.holder;
+package com.jianspring.starter.redis.operations;
 
 import com.jianspring.starter.redis.enums.IRedisKey;
 import org.springframework.data.geo.Circle;
@@ -22,13 +22,13 @@ import java.util.function.Function;
  * @Date: 2023/3/3 下午1:56
  * @Version: 1.0.0
  */
-public class RedisHolder {
+public class RedisOperations {
 
 
     private final RedisTemplate<String, Object> redisTemplate;
 
 
-    public RedisHolder(RedisTemplate<String, Object> redisTemplate) {
+    public RedisOperations(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

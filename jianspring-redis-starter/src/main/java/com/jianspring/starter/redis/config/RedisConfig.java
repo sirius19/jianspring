@@ -1,6 +1,6 @@
 package com.jianspring.starter.redis.config;
 
-import com.jianspring.starter.redis.holder.RedisHolder;
+import com.jianspring.starter.redis.operations.RedisOperations;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class RedisConfig {
 
     @Bean
+    @ConditionalOnMissingBean(RedisTemplate.class)
     RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
@@ -42,12 +43,13 @@ public class RedisConfig {
     }
 
     @Bean
-    RedisHolder redisHolder(RedisTemplate<String, Object> redisTemplate) {
-        return new RedisHolder(redisTemplate);
+    RedisOperations redisOperations(RedisTemplate<String, Object> redisTemplate) {
+        return new RedisOperations(redisTemplate);
     }
 
     @Bean
     @ConditionalOnProperty(name = "spring.redis.cluster.nodes")
+    @ConditionalOnMissingBean(RedisClusterConfiguration.class)
     public RedisConnectionFactory redisConnectionFactory(RedisProperties redisProperties) {
         RedisClusterConfiguration clusterConfig = new RedisClusterConfiguration();
 
