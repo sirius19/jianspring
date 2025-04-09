@@ -34,6 +34,7 @@
         <module>jianspring-db-starter</module>
         <module>jianspring-lock-starter</module>
         <module>jianspring-sentinel-starter</module>
+        <module>jianspring-restclient-starter</module>
     </modules>
 
     <dependencyManagement>

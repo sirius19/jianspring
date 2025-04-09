@@ -1,0 +1,5 @@
+- 这是一个starter，基于spring6 springboot3来设计的。目的是为了实现对远程调用的基本封装
+- 采用spring6 的RestClient
+- 支持负载均衡
+- 支持统一结果值封装，以及解封。远程调用结果统一会被包装到ApiResult中，而该starter中，需要自动解封，获取其中的data字段，并转成对应的对象
+- 支持调用时自定义header，包括traceId等

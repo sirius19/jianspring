@@ -1,0 +1,21 @@
+jianspring:
+  rest-client:
+    enabled: true                # 是否启用 RestClient
+    connect-timeout: 5s          # 连接超时时间
+    response-timeout: 5s         # 响应超时时间
+    unwrap-api-result: true      # 是否自动解封 ApiResult
+    trace-id-enabled: true       # 是否传递 traceId
+    log-enabled: true            # 是否启用请求日志
+    resilience4j:
+      enabled: true              # 是否启用 Resilience4j
+      retry-config:
+        max-attempts: 3          # 最大重试次数
+        wait-duration: 500ms     # 重试等待时间
+      rate-limiter-config:
+        limit-refresh-period: 1s # 限流刷新周期
+        limit-for-period: 100    # 周期内允许的请求数
+        timeout-duration: 1s     # 超时时间
+      circuit-breaker-config:
+        failure-rate-threshold: 50  # 失败率阈值
+        wait-duration-in-open-state: 10s  # 开路状态等待时间
+        sliding-window-size: 100   # 滑动窗口大小

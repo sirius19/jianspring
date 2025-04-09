@@ -21,6 +21,10 @@ public class ApiResult<T> {
 
     private T data;
 
+    public ApiResult() {
+        // 无参构造函数
+    }
+
     private ApiResult(String traceId, int code, String msg, T data) {
         this.traceId = traceId;
         this.code = code;
