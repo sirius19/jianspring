@@ -12,6 +12,7 @@
 - 支持请求重试、限流和断路器（基于 Resilience4j）
 - 支持请求日志记录
 - 支持异常处理
+- 支持基于 WebClient 的异步请求
 
 ## 使用方法
 
@@ -23,3 +24,22 @@
     <artifactId>jianspring-restclient-starter</artifactId>
     <version>${jianspring.version}</version>
 </dependency>
+```
+
+### 4. 使用WebClient进行异步调用
+
+除了使用RestClient进行同步调用外，还可以使用WebClient进行异步调用。
+
+#### 4.1 定义接口
+
+```java
+@JianWebClient("http://user-service")
+public interface UserAsyncService {
+    
+    @JianRequest(path = "/users/{id}", method = RequestMethod.GET)
+    Mono<User> getUserById(@PathVariable("id") Long id);
+    
+    @JianRequest(path = "/users", method = RequestMethod.POST)
+    Mono<User> createUser(@RequestBody User user);
+}
+```

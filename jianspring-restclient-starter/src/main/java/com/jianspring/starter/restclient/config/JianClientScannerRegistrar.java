@@ -2,6 +2,7 @@ package com.jianspring.starter.restclient.config;
 
 import com.jianspring.starter.restclient.annotation.EnableJianClients;
 import com.jianspring.starter.restclient.annotation.JianClient;
+import com.jianspring.starter.restclient.annotation.JianReactiveClient;
 import com.jianspring.starter.restclient.factory.JianClientFactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -42,16 +43,19 @@ public class JianClientScannerRegistrar implements ImportBeanDefinitionRegistrar
         }
     }
 
+    // 在createScanner方法中修改
     private ClassPathScanningCandidateComponentProvider createScanner() {
         ClassPathScanningCandidateComponentProvider scanner =
                 new ClassPathScanningCandidateComponentProvider(false) {
                     @Override
                     protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                        return beanDefinition.getMetadata().isInterface() &&
-                                beanDefinition.getMetadata().hasAnnotation(JianClient.class.getName());
+                        return beanDefinition.getMetadata().isInterface() && 
+                               (beanDefinition.getMetadata().hasAnnotation(JianClient.class.getName()) ||
+                                beanDefinition.getMetadata().hasAnnotation(JianReactiveClient.class.getName()));
                     }
                 };
         scanner.addIncludeFilter(new AnnotationTypeFilter(JianClient.class));
+        scanner.addIncludeFilter(new AnnotationTypeFilter(JianReactiveClient.class)); // 添加WebClient注解过滤器
         return scanner;
     }
 
