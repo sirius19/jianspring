@@ -2,6 +2,7 @@ package com.jianspring.starter.restclient.config;
 
 import com.jianspring.starter.restclient.interceptor.LoggingInterceptor;
 import com.jianspring.starter.restclient.interceptor.TraceIdInterceptor;
+import io.github.resilience4j.retry.Retry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -65,12 +66,13 @@ public class RestClientConfig {
      * 创建日志拦截器
      *
      * @param properties 配置属性
+     * @param retry      重试实例
      * @return LoggingInterceptor
      */
     @Bean
     @ConditionalOnMissingBean
-    public LoggingInterceptor loggingInterceptor(RestClientProperties properties) {
-        return new LoggingInterceptor(properties);
+    public LoggingInterceptor loggingInterceptor(RestClientProperties properties, Retry retry) {
+        return new LoggingInterceptor(properties, retry);
     }
 
     /**

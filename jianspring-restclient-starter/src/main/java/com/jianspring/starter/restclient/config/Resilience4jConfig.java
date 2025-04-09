@@ -34,7 +34,8 @@ public class Resilience4jConfig {
         RetryConfig retryConfig = RetryConfig.custom()
                 .maxAttempts(properties.getResilience4j().getRetryConfig().getMaxAttempts())
                 .waitDuration(properties.getResilience4j().getRetryConfig().getWaitDuration())
-                .retryExceptions(RestClientException.class)
+                .retryExceptions(Exception.class)  // 修改为更通用的异常类型
+//                .ignoreExceptions(BusinessException.class) // 忽略业务异常
                 .build();
         return RetryRegistry.of(retryConfig);
     }

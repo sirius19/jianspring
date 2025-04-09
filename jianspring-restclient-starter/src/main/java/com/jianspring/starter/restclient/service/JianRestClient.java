@@ -54,38 +54,43 @@ public class JianRestClient {
     }
 
     private String resolveUrl(String url) {
-        if (url.startsWith("http://") && !url.startsWith("http://localhost")) {
-            String serviceName = url.substring(7).split("/")[0];
-            if (!serviceName.contains(":")) {
-                try {
-                    ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
-                            .getInstance(serviceName);  // 修改类型为 ReactiveLoadBalancer
-                    if (loadBalancer == null) {
-                        return url;
-                    }
-
-                    ServiceInstance instance = Mono.from(loadBalancer.choose())
-                            .map(response -> {
-                                if (response != null && response.getServer() != null) {
-                                    return response.getServer();
-                                }
-                                return null;
-                            })
-                            .block();
-
-                    if (instance != null) {
-                        return url.replace(
-                                "http://" + serviceName,
-                                "http://" + instance.getHost() + ":" + instance.getPort()
-                        );
-                    }
-                } catch (Exception e) {
-                    log.warn("Failed to resolve service: " + serviceName, e);
-                    return url;
-                }
-            }
+        if (!url.startsWith("http://") || url.startsWith("http://localhost")) {
+            return url;
         }
-        return url;
+
+        String serviceName = url.substring(7).split("/")[0];
+        if (serviceName.contains(":")) {
+            return url;
+        }
+
+        try {
+            ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
+                    .getInstance(serviceName);
+            if (loadBalancer == null) {
+                log.warn("No load balancer found for service: {}", serviceName);
+                return url;  // 返回原始URL，让后续重试机制处理
+            }
+
+            ServiceInstance instance = Mono.from(loadBalancer.choose())
+                    .filter(response -> response != null)
+                    .map(response -> response.getServer())
+                    .filter(server -> server != null)
+                    .blockOptional()
+                    .orElse(null);  // 使用 orElse 替代 orElseThrow
+
+            if (instance == null) {
+                log.warn("No available instance for service: {}", serviceName);
+                return url;  // 返回原始URL，让后续重试机制处理
+            }
+
+            return url.replace(
+                    "http://" + serviceName,
+                    "http://" + instance.getHost() + ":" + instance.getPort()
+            );
+        } catch (Exception e) {
+            log.warn("Failed to resolve service: {}, falling back to original URL", serviceName, e);
+            return url;  // 返回原始URL，让后续重试机制处理
+        }
     }
 
     /**
