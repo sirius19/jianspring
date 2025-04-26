@@ -7,7 +7,7 @@ import lombok.ToString;
 @ToString
 public enum CommonErrorCode implements IErrorCode {
 
-    SUCCESS(200, "Success"),
+    SUCCESS(0, "Success"),
     ERROR(500, "Error"),
     BIZ_ERROR(501, "Biz Error"),
     SYSTEM_ERROR(502, "System Error"),
@@ -20,8 +20,7 @@ public enum CommonErrorCode implements IErrorCode {
     EXCEED_MAX_SESSION(407, "exceed max session"),
     OVER_FILE_SIZE(413, "update over file size"),
     TOKEN_NOT_EXIST(409, "token not exist"),
-    ILLEGAL_REQUEST(503, "Illegal request")
-    ;
+    ILLEGAL_REQUEST(503, "Illegal request");
 
     private final Integer code;
 

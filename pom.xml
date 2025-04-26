@@ -99,6 +99,11 @@
                 <artifactId>jianspring-sentinel-starter</artifactId>
                 <version>${jianspring.starter.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.jianspring</groupId>
+                <artifactId>jianspring-restclient-starter</artifactId>
+                <version>${jianspring.starter.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.springdoc</groupId>

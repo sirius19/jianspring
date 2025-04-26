@@ -41,9 +41,9 @@ public class MvcInterceptorConfig {
         return new I18nInterceptor();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    LocaleResolver localeResolver() {
+    @Bean(name = "customLocaleResolver")
+    @ConditionalOnMissingBean(name = "customLocaleResolver")
+    LocaleResolver customLocaleResolver() {
         SessionLocaleResolver localeResolver = new SessionLocaleResolver();
         localeResolver.setDefaultLocale(LocaleContextHolder.getLocale());
         return localeResolver;

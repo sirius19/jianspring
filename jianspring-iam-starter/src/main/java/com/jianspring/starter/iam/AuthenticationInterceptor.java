@@ -23,7 +23,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * @author: InfoInsights
@@ -70,6 +69,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor, Ordered {
             return true;
         }
 
+        boolean isLoggedIn = handlerUserContext(request);
+
         // 1. 检查是否需要忽略token验证
         if (handlerMethod.getMethod().isAnnotationPresent(IgnoreToken.class)) {
             if (log.isDebugEnabled()) {
@@ -81,8 +82,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor, Ordered {
         // 2. 检查是否需要权限验证
         RequiresPermissions requiresPermissions = handlerMethod.getMethodAnnotation(RequiresPermissions.class);
 
-        // 3. 处理用户上下文（登录验证）
-        boolean isLoggedIn = handlerUserContext(request);
         // 需要权限验证时，必须先登录
         if (requiresPermissions != null && !isLoggedIn) {
             log.error("need login for permission check:{}", request.getRequestURI());

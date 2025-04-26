@@ -41,7 +41,6 @@ public class UserContextUtils {
             userContext.setParentId(context.getParentId());
             userContext.setSpanId(context.getSpanId());
             userContext.setTraceId(context.getTraceId());
-            userContext.setLocale(context.getLocale());
             if (userContext.getHint() == null) {
                 userContext.setHint(context.getHint());
             }
