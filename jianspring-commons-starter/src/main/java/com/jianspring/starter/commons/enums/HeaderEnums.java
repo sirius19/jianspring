@@ -26,7 +26,10 @@ public enum HeaderEnums {
     VERSION("JIAN-VERSION", "版本号"),
     APP_KEY("JIAN-APP-KEY", "应用标识"),
     HINT_KEY("hint", "hint"),
-    SENTINEL_ORIGN("S-User", "sentinel origin标识");
+    REQUESTID("JIAN-REQUESTID", "请求id"),
+    SENTINEL_ORIGN("S-User", "sentinel origin标识"),
+    JIANSPRINGMODEL("JIAN-MODEL", "JianSpringModel"),
+    ;
 
     private final String key;
 

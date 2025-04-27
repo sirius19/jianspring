@@ -1,5 +1,6 @@
 package com.jianspring.starter.cloud.interceptor;
 
+import com.jianspring.starter.cloud.config.InterceptorProperties;
 import com.jianspring.starter.iam.AuthenticationInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +52,9 @@ public class MvcInterceptorConfig {
 
     @Bean
     @DependsOn({"localeChangeInterceptor", "authenticationInterceptor"})
-    WebMvcConfigurer webMvcConfigurer(AuthenticationInterceptor authenticationInterceptor, LocaleChangeInterceptor localeChangeInterceptor) {
+    WebMvcConfigurer webMvcConfigurer(AuthenticationInterceptor authenticationInterceptor, 
+                                     LocaleChangeInterceptor localeChangeInterceptor,
+                                     InterceptorProperties interceptorProperties) {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
@@ -68,10 +71,11 @@ public class MvcInterceptorConfig {
                             .excludePathPatterns("/health", "/api-doc", "/actuator/**", "/v3/api-docs/**", "/swagger-ui.html");
                 }
 
-                if (duplicateRequestInterceptor() != null) {
+                if (duplicateRequestInterceptor() != null && interceptorProperties.getDuplicateRequest().isEnabled()) {
+                    InterceptorProperties.DuplicateRequest config = interceptorProperties.getDuplicateRequest();
                     registry.addInterceptor(duplicateRequestInterceptor())
-                            .addPathPatterns("/**")
-                            .excludePathPatterns("/health", "/api-doc", "/actuator/**", "/v3/api-docs/**", "/swagger-ui.html");  // 你可以根据需求调整路径
+                            .addPathPatterns(config.getIncludePaths().toArray(new String[0]))
+                            .excludePathPatterns(config.getExcludePaths().toArray(new String[0]));
                 }
 
                 if (null != noWrapInterceptor()) {
@@ -81,6 +85,4 @@ public class MvcInterceptorConfig {
             }
         };
     }
-
-
 }

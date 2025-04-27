@@ -18,5 +18,6 @@ public class IamJwtProperties {
 
     private String sign;
     private Boolean allowDirectInvoke = false;
+    private Long expiration = 86400000L * 30;// 默认30天
 
 }

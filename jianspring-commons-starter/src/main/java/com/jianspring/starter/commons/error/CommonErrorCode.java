@@ -20,7 +20,10 @@ public enum CommonErrorCode implements IErrorCode {
     EXCEED_MAX_SESSION(407, "exceed max session"),
     OVER_FILE_SIZE(413, "update over file size"),
     TOKEN_NOT_EXIST(409, "token not exist"),
-    ILLEGAL_REQUEST(503, "Illegal request");
+    ILLEGAL_REQUEST(503, "Illegal request"),
+    DUPLICATE_REQUEST(411, "Duplicate request detected"),
+
+    ;
 
     private final Integer code;
 
